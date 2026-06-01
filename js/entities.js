@@ -70,7 +70,10 @@ const Entities = {
   },
   makeItemMesh(id) {
     const d = defOf(id);
-    const tile = d.isBlock ? (d.all !== undefined ? d.all : (d.front !== undefined ? d.front : d.side)) : d.tile;
+    // Orpo/tuntematon ID (esim. poistetusta tai uudelleennumeroidusta esineestä vanhassa
+    // tallennuksessa): käytä oletustekstuuria, jottei pudottaminen kaadu ja jää arkkua jumiin.
+    let tile = !d ? 0 : (d.isBlock ? (d.all !== undefined ? d.all : (d.front !== undefined ? d.front : d.side)) : d.tile);
+    if (tile === undefined || tile === null) tile = 0;
     const geo = this.dropGeo.clone();
     const uvr = Tex.uv(tile), uv = geo.attributes.uv;
     for (let i = 0; i < uv.count; i++) {
