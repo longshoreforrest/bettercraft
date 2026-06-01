@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>BetterCraft</title>
+<link rel="icon" type="image/png" href="assets/icon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===================== ACCOUNT ===================== -->
+<div id="account">
+  <h1 class="mclogo">CopyCraft</h1>
+  <div class="sub">3D-louhinta- ja rakennuspeli</div>
+  <div class="panel">
+    <div class="row">
+      <label>Käyttäjänimi</label>
+      <input type="text" id="accUser" placeholder="nimimerkki" autocomplete="off">
+    </div>
+    <div class="row">
+      <label>Salasana</label>
+      <input type="password" id="accPass" placeholder="salasana">
+    </div>
+    <div id="accError" class="errmsg"></div>
+    <div class="btn" id="loginBtn">Kirjaudu sisään</div>
+    <div class="btn" id="createBtn" style="background:#3a7ac0;">Luo uusi tili</div>
+    <div class="help">
+      Tili ja maailmat tallentuvat <b>tähän selaimeen</b> (ei nettipalvelinta).
+      Ensimmäisellä kerralla klikkaa <b>Luo uusi tili</b> — tai kirjoita nimi/salasana
+      ja klikkaa <b>Kirjaudu sisään</b>, niin tili luodaan automaattisesti jos sitä ei vielä ole.
+    </div>
+  </div>
+</div>
+
+<!-- ===================== WORLD LIST ===================== -->
+<div id="worlds" class="hidden">
+  <h1 class="mclogo">Maailmat</h1>
+  <div class="sub" id="welcome">Tervetuloa!</div>
+  <div class="panel" style="min-width:420px;">
+    <div id="worldList"></div>
+    <div class="btn" id="newWorldBtn">+ Uusi maailma</div>
+    <div style="display:flex;gap:8px;">
+      <div class="btn" id="friendsBtn" style="background:#7a3aa0;flex:1;">👥 Kaverit</div>
+      <div class="btn" id="logoutBtn" style="background:#777;flex:1;">Kirjaudu ulos</div>
+      <div class="btn" id="musicBtn2" style="background:#3a7ac0;flex:1;">Musiikki: päällä</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== FRIENDS PANEL ===================== -->
+<div id="friendsPanel" class="hidden">
+  <div class="friends-window">
+    <h2>👥 Kaverit</h2>
+    <div class="friends-row">
+      <input type="text" id="friendSearchInput" placeholder="Hae käyttäjänimellä…">
+      <div class="btn-sm" id="friendSearchBtn">Hae</div>
+    </div>
+    <div id="friendSearchResult"></div>
+    <h3>Pyynnöt</h3>
+    <div id="friendRequestsList" class="friends-list"></div>
+    <h3>Kaverit</h3>
+    <div id="friendsList" class="friends-list"></div>
+    <h3>Liity ID:llä</h3>
+    <div class="friends-row">
+      <input type="text" id="joinWorldIdInput" placeholder="Liitä maailman ID (w12345…)">
+      <div class="btn-sm accept" id="joinWorldIdBtn">Liity</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <div class="btn" id="friendsRefreshBtn" style="background:#3a7ac0;flex:1;">↻ Päivitä</div>
+      <div class="btn" id="friendsCloseBtn" style="background:#777;flex:1;">Sulje</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== NEW WORLD ===================== -->
+<div id="menu" class="hidden">
+  <h1 class="mclogo">Uusi maailma</h1>
+  <div class="panel">
+    <div class="row">
+      <label>Maailman nimi</label>
+      <input type="text" id="nameInput" placeholder="esim. Seikkailumaailma" autocomplete="off">
+    </div>
+    <div class="row">
+      <label>Maailman tyyppi</label>
+      <div class="choices" id="worldChoices">
+        <div class="choice active" data-world="normal">Normaali</div>
+        <div class="choice" data-world="amplified">Vuoristo</div>
+        <div class="choice" data-world="islands">Saaristo</div>
+        <div class="choice" data-world="flat">Tasanko</div>
+        <div class="choice" data-world="snow">Lumimaa</div>
+        <div class="choice" data-world="desert">Aavikko</div>
+      </div>
+    </div>
+    <div class="row">
+      <label>Pelitila</label>
+      <div class="choices" id="modeChoices">
+        <div class="choice active" data-mode="survival">Selviytyminen</div>
+        <div class="choice" data-mode="creative">Creative (luova)</div>
+      </div>
+    </div>
+    <div class="row">
+      <label>Siemen (jätä tyhjäksi = satunnainen)</label>
+      <input type="text" id="seedInput" placeholder="esim. 12345 tai sana">
+    </div>
+    <div class="btn" id="startBtn">Luo maailma ▶</div>
+    <div class="btn" id="backBtn" style="background:#777;">Takaisin</div>
+    <div class="help">
+      <b>WASD</b> liiku &nbsp; <b>Hiiri</b> katso &nbsp; <b>Väli</b> hyppy &nbsp; <b>Vasen</b> louhi/lyö &nbsp; <b>Oikea</b> rakenna/käytä<br>
+      <b>1-9</b> tai rulla valitse &nbsp; <b>E</b> reppu &nbsp; <b>Q</b> tiputa (Ctrl+Q koko pino) &nbsp; <b>Ctrl</b> tai <b>W×2</b> juokse &nbsp; <b>Shift</b> kyykky &nbsp; <b>M</b> musiikki &nbsp; <b>Esc</b> tauko
+    </div>
+  </div>
+</div>
+
+<!-- ===================== LOADING ===================== -->
+<div id="loading" class="hidden">
+  <h1 class="mclogo" style="font-size:40px;">CopyCraft</h1>
+  <div>Luodaan maailmaa…</div>
+  <div class="bar"><div class="fill" id="loadFill"></div></div>
+</div>
+
+<!-- ===================== HUD ===================== -->
+<div id="hud" class="hidden">
+  <div id="crosshair"></div>
+  <div id="clock">Päivä 1</div>
+  <div id="coords">X: 0  Y: 0  Z: 0</div>
+  <div id="mpStatus" class="hidden">🌐 <span id="mpStatusId"></span> <span id="mpStatusCopy" title="Kopioi">📋</span></div>
+  <div id="bossbar" class="hidden">
+    <div id="bossName">Ender-lohikäärme</div>
+    <div id="bossBarOuter"><div id="bossBarFill"></div></div>
+  </div>
+  <div id="armorbar" class="statline"></div>
+  <div id="absorptionbar" class="statline"></div>
+  <div id="bars">
+    <div class="statline" id="healthbar"></div>
+    <div class="statline" id="hungerbar"></div>
+  </div>
+  <div id="minebarWrap" style="position:absolute;left:50%;top:54%;transform:translateX(-50%);width:90px;height:7px;border:1px solid #000;display:none;">
+    <div id="minebar" style="height:100%;width:0%;background:#dfdfdf;"></div>
+  </div>
+  <div id="xpbar"><div id="xpbarFill"></div><div id="xpLevel"></div></div>
+  <div id="hotbar"></div>
+  <!-- ===== Kosketusohjaus (vain puhelin/tabletti) ===== -->
+  <div id="touchControls" class="hidden">
+    <div id="tcLook"></div>
+    <div id="tcMove"><div id="tcStick"></div></div>
+    <div id="tcRight">
+      <div class="tcbtn" id="tcPlace" title="Rakenna">▣</div>
+      <div class="tcbtn" id="tcJump" title="Hyppy">⤒</div>
+      <div class="tcbtn" id="tcMine" title="Louhi/lyö">⛏</div>
+      <div class="tcbtn" id="tcSneak" title="Kyykky">⤓</div>
+    </div>
+    <div id="tcTop">
+      <div class="tcbtn small" id="tcSprint" title="Juoksu">»</div>
+      <div class="tcbtn small" id="tcInv" title="Reppu">🎒</div>
+      <div class="tcbtn small" id="tcDrop" title="Tiputa">⤵</div>
+      <div class="tcbtn small" id="tcPause" title="Tauko">⏸</div>
+    </div>
+  </div>
+  <div id="toast"></div>
+  <div id="hitflash"></div>
+  <div id="chatHud"></div>
+  <div id="chatInputWrap" class="hidden"><span id="chatPrefix">[Chat]</span><input type="text" id="chatInput" maxlength="200" autocomplete="off"></div>
+</div>
+
+<!-- ===================== SCREENS ===================== -->
+<div id="screen" class="hidden"></div>
+<div id="cursorItem"><div class="count"></div></div>
+<div id="itemTooltip" class="hidden"></div>
+
+<div id="overlay" class="hidden">
+  <h2 id="overlayTitle">Tauko</h2>
+  <div class="btn" id="resumeBtn">Jatka peliä</div>
+  <div class="btn" id="mpToggleBtn" style="background:#7a3aa0;">🌐 Avaa kavereille</div>
+  <div class="btn" id="voiceToggleBtn" style="background:#3aa07a;">🎤 Voice chat: pois</div>
+  <div class="btn" id="spectatorToggleBtn" style="background:#5aa0c0;display:none;">👁 Spectator: pois</div>
+  <div class="btn" id="musicBtn" style="background:#3a7ac0;">Musiikki: päällä</div>
+  <div class="btn" id="menuBtn" style="background:#777;">Tallenna ja lopeta</div>
+</div>
+
+<script src="js/lib/three.min.js"></script>
+<script src="js/noise.js"></script>
+<script src="js/blocks.js"></script>
+<script src="js/crafting.js"></script>
+<script src="js/world.js"></script>
+<script src="js/entities.js"></script>
+<script src="js/player.js"></script>
+<script src="js/music.js"></script>
+<script src="js/accounts.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>

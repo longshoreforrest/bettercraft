@@ -1,0 +1,433 @@
+/* CopyCraft styles */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* Minecraft-tyylinen 3D-lohkologo. Toimii myös offline-tilassa,
+   jolloin pixel-fontti korvautuu lihavalla monospacella. */
+.mclogo {
+  font-family: 'Press Start 2P', 'Consolas', monospace;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  line-height: 1.1;
+  color: #7ed94f;                 /* ruohonvihreä yläpinta */
+  transform: none;
+  text-shadow:
+    1px 1px 0 #4c8a2e,
+    2px 2px 0 #4c8a2e,
+    3px 3px 0 #3a6b22,
+    4px 4px 0 #3a6b22,
+    5px 5px 0 #285018,
+    6px 6px 0 #285018,
+    7px 7px 0 #163a0e,
+    8px 8px 0 #163a0e,            /* ekstruusion syvyys */
+    9px 9px 0 #000,
+    10px 10px 0 #000,
+    12px 14px 14px rgba(0,0,0,.6); /* pehmeä varjo lattialle */
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  background: #1a1a2a; color: #fff;
+  font-family: 'Trebuchet MS', Verdana, sans-serif;
+  -webkit-user-select: none; user-select: none;
+}
+canvas { display: block; }
+.hidden { display: none !important; }
+.pixel { image-rendering: pixelated; image-rendering: crisp-edges; }
+
+/* ---------- Main menu ---------- */
+#menu {
+  position: absolute; inset: 0; z-index: 50;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.32) 100%);
+  text-align: center;
+}
+#menu h1 { font-size: 30px; }
+#menu .sub { margin: 6px 0 22px; color: #fff; font-weight: bold; text-shadow: 2px 2px 0 #000; }
+.panel {
+  background: rgba(20,20,28,.86); border: 3px solid #000;
+  border-radius: 10px; padding: 20px 26px; min-width: 360px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.5);
+}
+.row { margin: 10px 0; text-align: left; }
+.row > label { display: block; font-size: 13px; color: #bcd; margin-bottom: 6px; }
+.choices { display: flex; flex-wrap: wrap; gap: 8px; }
+.choice {
+  flex: 1 1 30%; padding: 9px 6px; cursor: pointer;
+  background: #3a3a48; border: 2px solid #000; border-radius: 6px;
+  color: #fff; font-size: 13px; transition: background .1s;
+}
+.choice:hover { background: #50506a; }
+.choice.active { background: #5aa832; border-color: #cfe; }
+input[type=text] {
+  width: 100%; padding: 8px; border-radius: 6px; border: 2px solid #000;
+  background: #222; color: #fff; font-size: 14px;
+}
+.btn {
+  display: inline-block; cursor: pointer; font-size: 17px; font-weight: bold;
+  padding: 12px 20px; margin-top: 14px; width: 100%;
+  background: #5aa832; color: #fff; border: 3px solid #000; border-radius: 8px;
+  text-shadow: 1px 1px 0 #000; transition: transform .05s, background .1s;
+}
+.btn:hover { background: #6cd44a; }
+.btn:active { transform: translateY(2px); }
+.help {
+  margin-top: 16px; font-size: 12px; color: #ccd; line-height: 1.7;
+  background: rgba(0,0,0,.35); padding: 10px 14px; border-radius: 8px;
+}
+.help b { color: #ffe27a; }
+
+/* ---------- HUD ---------- */
+#hud { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
+#crosshair {
+  position: absolute; left: 50%; top: 50%; width: 22px; height: 22px;
+  transform: translate(-50%, -50%);
+  background:
+    linear-gradient(#fff,#fff) 50% 0/2px 9px no-repeat,
+    linear-gradient(#fff,#fff) 50% 100%/2px 9px no-repeat,
+    linear-gradient(#fff,#fff) 0 50%/9px 2px no-repeat,
+    linear-gradient(#fff,#fff) 100% 50%/9px 2px no-repeat;
+  mix-blend-mode: difference;
+}
+#bars {
+  position: absolute; bottom: 78px; left: 50%; transform: translateX(-50%);
+  width: 364px; display: flex; justify-content: space-between;
+}
+.statline { display: flex; gap: 1px; }
+.icon {
+  width: 16px; height: 16px; image-rendering: pixelated;
+  background-size: cover;
+}
+#hotbar {
+  position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 3px; padding: 3px;
+  background: rgba(0,0,0,.45); border: 3px solid #2b2b33; border-radius: 6px;
+  pointer-events: auto; /* hotbar-slotteja voi napauttaa (puhelin) */
+}
+
+/* ===== Kosketusohjaus ===== */
+#touchControls { position: absolute; inset: 0; z-index: 40; pointer-events: none; }
+#tcLook { position: absolute; inset: 0; z-index: 1; pointer-events: auto; touch-action: none; }
+#tcMove {
+  position: absolute; left: 22px; bottom: 22px; width: 132px; height: 132px;
+  border-radius: 50%; background: rgba(255,255,255,.10);
+  border: 2px solid rgba(255,255,255,.30); z-index: 3; pointer-events: auto; touch-action: none;
+}
+#tcStick {
+  position: absolute; left: 50%; top: 50%; width: 58px; height: 58px;
+  margin: -29px 0 0 -29px; border-radius: 50%;
+  background: rgba(255,255,255,.45); border: 2px solid rgba(255,255,255,.6);
+}
+#tcRight {
+  position: absolute; right: 16px; bottom: 22px; z-index: 3;
+  display: grid; grid-template-columns: 76px 76px; gap: 12px; pointer-events: none;
+}
+#tcTop { position: absolute; right: 14px; top: 58px; z-index: 3; display: flex; gap: 8px; pointer-events: none; }
+.tcbtn {
+  pointer-events: auto; touch-action: none; user-select: none; -webkit-user-select: none;
+  display: flex; align-items: center; justify-content: center;
+  width: 74px; height: 74px; border-radius: 16px;
+  background: rgba(0,0,0,.42); border: 2px solid rgba(255,255,255,.35);
+  color: #fff; font-size: 30px; line-height: 1;
+}
+.tcbtn:active, .tcbtn.on { background: rgba(108,212,74,.55); border-color: #6cd44a; }
+.tcbtn.small { width: 48px; height: 48px; font-size: 20px; border-radius: 12px; }
+#xpbar {
+  position: absolute; bottom: 76px; left: 50%; transform: translateX(-50%);
+  width: 360px; height: 9px; background: #1a1a1a; border: 1px solid #000;
+  border-radius: 2px; overflow: visible;
+}
+#xpbarFill {
+  height: 100%; width: 0%; background: linear-gradient(180deg, #b3ff5a, #4ea823);
+  transition: width .12s linear;
+}
+#xpLevel {
+  position: absolute; left: 50%; top: -4px; transform: translate(-50%, -100%);
+  color: #6cd44a; font-weight: bold; font-size: 14px;
+  text-shadow: 1px 1px 0 #000, 2px 2px 0 #000, -1px -1px 0 #000, -1px 1px 0 #000, 1px -1px 0 #000;
+}
+.slot {
+  position: relative; width: 52px; height: 52px;
+  background: #5a5a6b; border: 2px solid #2b2b33;
+  display: flex; align-items: center; justify-content: center;
+}
+.slot .ico {
+  width: 40px; height: 40px; background-size: cover; image-rendering: pixelated;
+}
+.slot .count {
+  position: absolute; right: 2px; bottom: 0; font-size: 14px; font-weight: bold;
+  color: #fff; text-shadow: 1px 1px 0 #000, 2px 2px 0 #000;
+}
+.slot.sel { border-color: #fff; box-shadow: 0 0 0 2px #fff; }
+#hotbar .slot { width: 52px; height: 52px; }
+
+#mininglabel {
+  position: absolute; left: 50%; top: 56%; transform: translateX(-50%);
+  font-size: 12px; color: #fff; text-shadow: 1px 1px 0 #000;
+}
+#toast {
+  position: absolute; left: 50%; top: 16%; transform: translateX(-50%);
+  background: rgba(0,0,0,.6); padding: 8px 16px; border-radius: 6px;
+  font-size: 14px; opacity: 0; transition: opacity .3s;
+}
+#clock {
+  position: absolute; top: 10px; right: 12px; font-size: 13px;
+  background: rgba(0,0,0,.45); padding: 6px 10px; border-radius: 6px;
+}
+#coords {
+  position: absolute; top: 42px; right: 12px; font-size: 12px;
+  background: rgba(0,0,0,.45); padding: 5px 10px; border-radius: 6px;
+  font-family: 'Consolas', 'Courier New', monospace;
+  letter-spacing: 0.5px;
+}
+#mpStatus {
+  position: absolute; top: 72px; right: 12px; font-size: 12px;
+  background: rgba(122, 58, 160, 0.78); padding: 5px 10px; border-radius: 6px;
+  font-family: 'Consolas', 'Courier New', monospace;
+  letter-spacing: 0.5px; color: #fff; pointer-events: auto;
+  border: 1px solid #a05ad8;
+}
+#mpStatus #mpStatusCopy { cursor: pointer; margin-left: 6px; }
+#mpStatus #mpStatusCopy:hover { color: #ffd24a; }
+#bossbar {
+  position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+  width: 480px; text-align: center; pointer-events: none;
+}
+#bossName {
+  color: #fff; font-size: 14px; font-weight: bold; margin-bottom: 4px;
+  text-shadow: 1px 1px 0 #000, 2px 2px 0 #000;
+}
+#bossBarOuter {
+  width: 100%; height: 14px;
+  background: rgba(0,0,0,.6); border: 2px solid #2a0030;
+  border-radius: 2px; overflow: hidden;
+}
+#bossBarFill {
+  height: 100%; width: 100%;
+  background: linear-gradient(90deg, #c020a0, #ff60d0);
+  transition: width .15s linear;
+  box-shadow: 0 0 8px #ff60d0 inset;
+}
+#hitflash {
+  position: absolute; inset: 0; background: #c00; opacity: 0;
+  transition: opacity .12s;
+}
+
+/* ---------- Inventory / crafting ---------- */
+#screen {
+  position: absolute; inset: 0; z-index: 30;
+  background: rgba(0,0,0,.55);
+  display: flex; align-items: center; justify-content: center;
+}
+.invwin {
+  background: #c6c6c6; border: 4px solid #555;
+  border-radius: 4px; padding: 14px; color: #222;
+  box-shadow: 0 14px 40px rgba(0,0,0,.6);
+  max-height: 94vh; overflow-y: auto;
+}
+.invwin h3 { margin-bottom: 8px; font-size: 16px; }
+.grid { display: grid; gap: 2px; }
+.invslot {
+  width: 46px; height: 46px; background: #8b8b8b;
+  border: 2px solid #fff; border-right-color: #555; border-bottom-color: #555;
+  position: relative; display: flex; align-items: center; justify-content: center;
+}
+.invslot:hover { background: #a6a6c0; }
+.invslot .ico { width: 36px; height: 36px; background-size: cover; image-rendering: pixelated; }
+.invslot .count {
+  position: absolute; right: 1px; bottom: -2px; font-size: 13px; font-weight: bold;
+  color: #fff; text-shadow: 1px 1px 0 #000, 2px 2px 0 #000;
+}
+.craftrow { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+.arrow { font-size: 28px; color: #555; }
+#cursorItem {
+  position: fixed; width: 40px; height: 40px; pointer-events: none; z-index: 60;
+  background-size: cover; image-rendering: pixelated; display: none;
+}
+#cursorItem .count {
+  position: absolute; right: -2px; bottom: -4px; font-size: 13px; font-weight: bold;
+  color: #fff; text-shadow: 1px 1px 0 #000, 2px 2px 0 #000;
+}
+#itemTooltip {
+  position: fixed; z-index: 80; pointer-events: none;
+  background: rgba(15,12,28,.96); border: 2px solid #4a3a8a;
+  border-radius: 4px; padding: 6px 10px; max-width: 280px;
+  color: #fff; font-size: 13px; line-height: 1.45;
+  box-shadow: 0 4px 14px rgba(0,0,0,.6);
+}
+#itemTooltip .ttname { font-weight: bold; font-size: 14px; }
+#itemTooltip .ttname.ench { color: #cd9aff; }
+#itemTooltip .ttench { color: #b6e6ff; font-size: 12px; margin-top: 3px; }
+.section-label { font-size: 12px; color: #444; margin: 10px 0 4px; }
+
+/* ---------- Pause / death ---------- */
+#overlay {
+  position: absolute; inset: 0; z-index: 40;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.7);
+}
+#overlay h2 { font-size: 40px; margin-bottom: 16px; text-shadow: 3px 3px 0 #000; }
+#overlay .btn { width: 280px; }
+#loading {
+  position: absolute; inset: 0; z-index: 45; background: #11131c;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+#loading .bar { width: 320px; height: 22px; border: 2px solid #fff; margin-top: 14px; }
+#loading .fill { height: 100%; width: 0%; background: #5aa832; transition: width .2s; }
+
+/* ---------- account / worlds screens ---------- */
+#account, #worlds {
+  position: absolute; inset: 0; z-index: 50;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.32) 100%);
+  text-align: center;
+}
+#account h1, #worlds h1 { font-size: 38px; }
+#account .sub, #worlds .sub { margin: 6px 0 22px; color: #fff; font-weight: bold; text-shadow: 2px 2px 0 #000; }
+input[type=password] {
+  width: 100%; padding: 8px; border-radius: 6px; border: 2px solid #000;
+  background: #222; color: #fff; font-size: 14px;
+}
+.errmsg { color: #ff6b6b; font-size: 13px; min-height: 18px; margin: 4px 0 2px; font-weight: bold; }
+.worldcard {
+  display: flex; align-items: center; gap: 10px; text-align: left;
+  background: #3a3a48; border: 2px solid #000; border-radius: 6px;
+  padding: 10px 12px; margin-bottom: 8px; cursor: pointer;
+}
+.worldcard:hover { background: #50506a; }
+.worldcard .winfo { flex: 1; }
+.worldcard .wname { font-size: 15px; font-weight: bold; }
+.worldcard .wmeta { font-size: 11px; color: #bcd; }
+.worldcard .wdel {
+  background: #a33; border: 2px solid #000; border-radius: 5px;
+  padding: 6px 9px; font-size: 12px; cursor: pointer; color: #fff;
+}
+.worldcard .wdel:hover { background: #d44; }
+#worldList { max-height: 320px; overflow-y: auto; }
+.nolist { color: #ccd; font-size: 13px; padding: 14px 0; }
+#armorbar {
+  position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 1px;
+}
+#absorptionbar {
+  position: absolute; bottom: 96px; left: calc(50% - 182px);
+  display: flex; gap: 1px;
+}
+
+/* ---------- friends ---------- */
+#friendsPanel {
+  position: absolute; inset: 0; z-index: 60;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, 0.65);
+}
+.friends-window {
+  background: #1d1f2a; border: 3px solid #4a3a8a; border-radius: 10px;
+  padding: 18px 22px; min-width: 460px; max-width: 90vw;
+  max-height: 88vh; overflow-y: auto; color: #fff;
+}
+.friends-window h2 { margin-bottom: 12px; color: #cd9aff; }
+.friends-window h3 { margin: 16px 0 6px; color: #aef; font-size: 14px; border-bottom: 1px solid #444; padding-bottom: 4px; }
+.friends-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.friends-row input { flex: 1; }
+.btn-sm {
+  padding: 8px 14px; background: #5aa832; color: #fff; border: 2px solid #000;
+  border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px;
+  text-shadow: 1px 1px 0 #000;
+}
+.btn-sm:hover { background: #6cd44a; }
+.btn-sm.danger { background: #a33; }
+.btn-sm.danger:hover { background: #d44; }
+.btn-sm.accept { background: #3a7ac0; }
+.btn-sm.accept:hover { background: #4a8ad0; }
+.friends-list { display: flex; flex-direction: column; gap: 5px; }
+.friend-card {
+  display: flex; align-items: center; gap: 10px;
+  background: #2a2c3a; border: 1px solid #4a4c5e;
+  padding: 8px 12px; border-radius: 5px;
+}
+.friend-card .fname { flex: 1; font-weight: bold; }
+.friend-card .fmeta { color: #aaa; font-size: 11px; }
+.friend-card .fonline { width: 8px; height: 8px; border-radius: 50%; }
+.friend-card .fonline.online { background: #5cd44a; box-shadow: 0 0 6px #5cd44a; }
+.friend-card .fonline.offline { background: #555; }
+.friends-empty { color: #888; font-size: 12px; padding: 10px; text-align: center; }
+
+/* ---------- chat ---------- */
+#chatHud {
+  position: absolute; left: 16px; bottom: 96px; max-width: 420px;
+  display: flex; flex-direction: column; gap: 3px;
+  pointer-events: none; font-size: 13px;
+}
+.chat-msg {
+  background: rgba(0,0,0,.55); padding: 4px 9px; border-radius: 4px;
+  color: #fff; text-shadow: 1px 1px 0 #000;
+  transition: opacity 1.2s linear;
+}
+.chat-msg .chat-user { color: #5fd4ff; font-weight: bold; margin-right: 5px; }
+.chat-msg.system .chat-user { color: #ffd24a; }
+#chatInputWrap {
+  position: absolute; left: 16px; bottom: 72px; right: 16px;
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(0,0,0,.7); padding: 6px 10px; border-radius: 4px;
+  pointer-events: auto;
+}
+#chatPrefix { color: #5fd4ff; font-weight: bold; font-size: 13px; }
+#chatInput {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: #fff; font-size: 14px; font-family: inherit;
+}
+
+/* ---------- Recipe book ---------- */
+.recipe-btn {
+  display: inline-block; cursor: pointer; font-size: 14px; font-weight: bold;
+  padding: 8px 14px; margin: 0 0 10px;
+  background: #5aa832; color: #fff; border: 2px solid #000; border-radius: 6px;
+  text-shadow: 1px 1px 0 #000;
+}
+.recipe-btn:hover { background: #6cd44a; }
+.recipe-overlay {
+  position: fixed; inset: 0; z-index: 70;
+  background: rgba(0,0,0,.78);
+  display: flex; align-items: center; justify-content: center;
+}
+.recipe-window {
+  background: #c6c6c6; border: 4px solid #555; border-radius: 6px;
+  padding: 16px 20px; color: #222;
+  width: 720px; max-width: 92vw; max-height: 88vh; overflow-y: auto;
+  box-shadow: 0 14px 40px rgba(0,0,0,.6);
+}
+.recipe-window h3 { margin-bottom: 8px; font-size: 17px; color: #222; }
+.recipe-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 5px; padding: 5px 8px;
+  background: #b0b0b0; border-radius: 4px;
+}
+.recipe-cell {
+  width: 26px; height: 26px;
+  background: #8a8a8a; border: 1px solid #555;
+  background-size: cover; image-rendering: pixelated;
+  flex-shrink: 0;
+}
+.recipe-result {
+  width: 36px; height: 36px;
+  background: #8a8a8a; border: 1px solid #333;
+  background-size: cover; image-rendering: pixelated;
+  position: relative; flex-shrink: 0;
+}
+.recipe-result .count {
+  position: absolute; right: -3px; bottom: -4px;
+  font-size: 13px; font-weight: bold; color: #fff;
+  text-shadow: 1px 1px 0 #000, 2px 2px 0 #000;
+}
+.recipe-arrow { font-size: 22px; color: #333; flex-shrink: 0; }
+.recipe-label { color: #222; font-size: 13px; font-weight: bold; margin-left: 6px; }
+.recipe-grid { display: grid; gap: 1px; }
+.recipe-grid-wrap { width: 96px; display: flex; align-items: center; justify-content: flex-start; flex-shrink: 0; }
+.recipe-shapeless { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; max-width: 96px; }
+.recipe-close {
+  display: inline-block; cursor: pointer; font-size: 13px; font-weight: bold;
+  padding: 6px 12px; background: #a33; color: #fff;
+  border: 2px solid #000; border-radius: 6px; margin-bottom: 10px;
+}
+.recipe-close:hover { background: #d44; }
